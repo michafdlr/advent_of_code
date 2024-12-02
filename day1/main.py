@@ -4,11 +4,7 @@ def ex1():
     list_1, list_2 = read_file_to_lists("day1/input.txt")
     list_1.sort()
     list_2.sort()
-    print(list_1[-10:], list_2[-10:])
-    sum_of_distances = 0
-    for i in range(len(list_1)):
-        sum_of_distances += abs(list_1[i]-list_2[i])
-    return sum_of_distances
+    return sum((abs(list_1[i]-list_2[i]) for i in range(len(list_1))))
 
 def ex2():
     dict_1, dict_2 = read_file_to_dicts("day1/input.txt")
