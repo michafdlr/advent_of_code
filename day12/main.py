@@ -43,9 +43,6 @@ def get_region(grid, pos, letter, not_visited):
                 queue.append(neighbor)
     return region, perimeter*len(region)
 
-def get_perimeter():
-    pass
-
 def ex1():
     grid = read_file("day12/input.txt")
     rows, cols = len(grid), len(grid[0])
@@ -59,8 +56,36 @@ def ex1():
         total_price += price
     return total_price
 
+
+def count_sides(region):
+    visited = set()
+    side_count = 0
+    for r, c in region:
+        for dr, dc in [(0, 1), (1,0), (0,-1), (-1,0)]:
+            next_pos = (r + dr, c + dc)
+            if next_pos not in region:
+                corner_r, corner_c = r, c
+                while (corner_r + dc, corner_c + dr) in region and (corner_r + dr, corner_c + dc) not in region:
+                    corner_r += dc
+                    corner_c += dr
+                if (corner_r, corner_c, dr, dc) not in visited:
+                    visited.add((corner_r, corner_c, dr, dc))
+                    side_count += 1
+    return side_count
+
+
 def ex2():
-    return
+    grid = read_file("day12/input.txt")
+    rows, cols = len(grid), len(grid[0])
+    not_visited = [(r, c) for r in range(rows) for c in range(cols)]
+    regions = []
+    total_price = 0
+    while not_visited:
+        pos = not_visited[0]
+        region = get_region(grid, pos, grid[pos[0]][pos[1]], not_visited)[0]
+        regions.append(region)
+        total_price += count_sides(region)*len(region)
+    return total_price
 
 if __name__ == "__main__":
-    print(ex1())
+    print(ex2())
