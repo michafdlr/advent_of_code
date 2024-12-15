@@ -116,10 +116,10 @@ def try_move(robot_map, pos, dpos):
             )
     elif dc == -1:
         if robot_map[new_row][new_col] == "]":
-            return try_move(robot_map, (new_row, new_col - 1), dpos)
+            return try_move(robot_map, (new_row, new_col + dc), dpos)
     elif dc == 1:
         if robot_map[new_row][new_col] == "[":
-            return try_move(robot_map, (new_row, new_col + 1), dpos)
+            return try_move(robot_map, (new_row, new_col + dc), dpos)
     return False
 
 def move_robot(robot_map, pos, dpos):
@@ -128,7 +128,7 @@ def move_robot(robot_map, pos, dpos):
     new_row, new_col = row + dr, col + dc
     if robot_map[new_row][new_col] == "#":
         return
-    elif robot_map[new_row][new_col] == ".":
+    if robot_map[new_row][new_col] == ".":
         robot_map[row][col], robot_map[new_row][new_col] = robot_map[new_row][new_col], robot_map[row][col]
         return
     if dc == 0:
@@ -142,19 +142,19 @@ def move_robot(robot_map, pos, dpos):
             robot_map[row][col], robot_map[new_row][new_col] = robot_map[new_row][new_col], robot_map[row][col]
     elif dc == -1:
         if robot_map[new_row][new_col] == "]":
-            move_robot(robot_map, (new_row, new_col - 1), dpos)
-            robot_map[new_row][new_col - 1], robot_map[new_row][new_col], robot_map[row][col] = (
+            move_robot(robot_map, (new_row, new_col + dc), dpos)
+            robot_map[new_row][new_col + dc], robot_map[new_row][new_col], robot_map[row][col] = (
                 robot_map[new_row][new_col],
                 robot_map[row][col],
-                robot_map[new_row][new_col - 1],
+                robot_map[new_row][new_col + dc],
             )
     elif dc == 1:
         if robot_map[new_row][new_col] == "[":
-            move_robot(robot_map, (new_row, new_col + 1), dpos)
-            robot_map[new_row][new_col + 1], robot_map[new_row][new_col], robot_map[row][col] = (
+            move_robot(robot_map, (new_row, new_col + dc), dpos)
+            robot_map[new_row][new_col + dc], robot_map[new_row][new_col], robot_map[row][col] = (
                 robot_map[new_row][new_col],
                 robot_map[row][col],
-                robot_map[new_row][new_col + 1],
+                robot_map[new_row][new_col + dc],
             )
 
 def ex2():
@@ -171,4 +171,5 @@ def ex2():
     return sum_coordinates
 
 if __name__ == "__main__":
+    print(ex1())
     print(ex2())
