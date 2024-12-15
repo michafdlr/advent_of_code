@@ -81,9 +81,94 @@ def ex1():
     sum_coordinates = sum(100*box[0] + box[1] for box in boxes)
     return sum_coordinates
 
+################## PART 2 #####################################
+
+replace_map = {"#": 2*["#"], "O": ["[", "]"], ".": 2*["."], "@": ["@", "."]}
+
+def rebuild_map(robot_map):
+    rows, cols = len(robot_map), len(robot_map[0])
+    new_map = [[] for _ in range(rows)]
+    for row in range(rows):
+        for col in range(cols):
+            new_map[row] += replace_map[robot_map[row][col]]
+    return new_map
+
+def debug_print(robot_map):
+    for line in robot_map:
+        print("".join(line))
+
+def try_move(robot_map, pos, dpos):
+    row, col = pos
+    dr, dc = dpos
+    new_row, new_col = row + dr, col + dc
+    if robot_map[new_row][new_col] == "#":
+        return False
+    elif robot_map[new_row][new_col] == ".":
+        return True
+    if dc == 0:
+        if robot_map[new_row][new_col] == "]":
+            return try_move(robot_map, (new_row, new_col), dpos) and try_move(
+                robot_map, (new_row, new_col - 1), dpos
+            )
+        elif robot_map[new_row][new_col] == "[":
+            return try_move(robot_map, (new_row, new_col), dpos) and try_move(
+                robot_map, (new_row, new_col + 1), dpos
+            )
+    elif dc == -1:
+        if robot_map[new_row][new_col] == "]":
+            return try_move(robot_map, (new_row, new_col - 1), dpos)
+    elif dc == 1:
+        if robot_map[new_row][new_col] == "[":
+            return try_move(robot_map, (new_row, new_col + 1), dpos)
+    return False
+
+def move_robot(robot_map, pos, dpos):
+    row, col = pos
+    dr, dc = dpos
+    new_row, new_col = row + dr, col + dc
+    if robot_map[new_row][new_col] == "#":
+        return
+    elif robot_map[new_row][new_col] == ".":
+        robot_map[row][col], robot_map[new_row][new_col] = robot_map[new_row][new_col], robot_map[row][col]
+        return
+    if dc == 0:
+        if robot_map[new_row][new_col] == "]":
+            move_robot(robot_map, (new_row, new_col), dpos)
+            move_robot(robot_map, (new_row, new_col - 1), dpos)
+            robot_map[row][col], robot_map[new_row][new_col] = robot_map[new_row][new_col], robot_map[row][col]
+        elif robot_map[new_row][new_col] == "[":
+            move_robot(robot_map, (new_row, new_col), dpos)
+            move_robot(robot_map, (new_row, new_col + 1), dpos)
+            robot_map[row][col], robot_map[new_row][new_col] = robot_map[new_row][new_col], robot_map[row][col]
+    elif dc == -1:
+        if robot_map[new_row][new_col] == "]":
+            move_robot(robot_map, (new_row, new_col - 1), dpos)
+            robot_map[new_row][new_col - 1], robot_map[new_row][new_col], robot_map[row][col] = (
+                robot_map[new_row][new_col],
+                robot_map[row][col],
+                robot_map[new_row][new_col - 1],
+            )
+    elif dc == 1:
+        if robot_map[new_row][new_col] == "[":
+            move_robot(robot_map, (new_row, new_col + 1), dpos)
+            robot_map[new_row][new_col + 1], robot_map[new_row][new_col], robot_map[row][col] = (
+                robot_map[new_row][new_col],
+                robot_map[row][col],
+                robot_map[new_row][new_col + 1],
+            )
 
 def ex2():
-    return
+    robot_map, moves = read_file("day15/input.txt")
+    robot_map = rebuild_map(robot_map)
+    robot = find_element(robot_map, "@")
+    for move in moves:
+        dpos = direction_map[move]
+        if try_move(robot_map, robot, dpos):
+            move_robot(robot_map, robot, dpos)
+            robot = (robot[0] + dpos[0], robot[1] + dpos[1])
+    boxes = find_element(robot_map, "[")
+    sum_coordinates = sum(100*box[0] + box[1] for box in boxes)
+    return sum_coordinates
 
 if __name__ == "__main__":
-    print(ex1())
+    print(ex2())
