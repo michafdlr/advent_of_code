@@ -30,7 +30,7 @@ def get_prio(previous, current, next):
     if current in previous:
         last = previous[current]
         if abs(next[0] - last[0]) == 1:
-            return 1000
+            return 1001
     return 1
 
 def get_possible_moves(pos, grid, visited, previous):
@@ -60,57 +60,94 @@ def solve_maze(grid, start, end):
                 previous[pos] = cur_pos
                 queue.put((prio_old + prio, pos))
             if pos == end:
-                path = retrace(previous, start, end)
-                return path
+                return prio_old + 1
 
 def print_solved_grid(path, grid):
     for (row, col) in path:
         grid[row][col] = "x"
     debug_print(grid)
 
-def retrace(previous, start, end):
-    path = deque()
-    current = end
-    while current != start:
-        path.appendleft(current)
-        current = previous.get(current)
-        if current is None:
-            return None
-    path.appendleft(start)
-    return list(path)
-
-
 def ex1():
-    grid = read_file("day16/testinput.txt")
-    #debug_print(grid)
-    #print("\n\n")
+    grid = read_file("day16/input.txt")
     start, end = find_start_and_end(grid)
-    path = solve_maze(grid, start, end)
-    #print(path)
-    forward = 0
-    turn = 0
-    previous = None
-    for i in range(len(path) - 1):
-        if i == 0:
-            if path[i+1][1] - path[i][1] == 1:
-                forward += 1
-                previous = (0,1)
-            else:
-                turn += 1
-                previous = (path[i+1][0] - path[i][0], path[i+1][1] - path[i][1])
-                forward += 1
-        else:
-            if previous:
-                if path[i+1][0] - path[i][0] == previous[0] and path[i+1][1] - path[i][1] == previous[1]:
-                    forward += 1
-                else:
-                    turn += 1
-                    previous = (path[i+1][0] - path[i][0], path[i+1][1] - path[i][1])
-                    forward += 1
-    return forward + 1000*turn
+    return solve_maze(grid, start, end)
 
 ################## PART 2 #####################################
 
+def solve_maze_optimized(grid, start, end):
+    queue = PriorityQueue()
+    queue.put((0, start, None))  # (cost, position, last_direction)
+
+
+    min_cost = {}
+
+    predecessors = {}
+
+    while not queue.empty():
+        cost, pos, last_dir = queue.get()
+        state = (pos, last_dir)
+
+        if state in min_cost and cost > min_cost[state]:
+            continue
+
+        min_cost[state] = cost
+
+        if pos == end:
+            continue
+
+        row, col = pos
+        for idx, (dr, dc) in enumerate(directions):
+            new_row, new_col = row + dr, col + dc
+            new_pos = (new_row, new_col)
+
+            if grid[new_row][new_col] != "#":
+                if last_dir is not None and last_dir != idx:
+                    move_cost = 1001
+                else:
+                    move_cost = 1
+                new_cost = cost + move_cost
+                new_state = (new_pos, idx)
+
+                if new_state in min_cost and new_cost > min_cost[new_state]:
+                    continue
+
+                if new_state not in predecessors:
+                    predecessors[new_state] = set()
+                predecessors[new_state].add(state)
+
+                queue.put((new_cost, new_pos, idx))
+
+    minimal_total_cost = min(
+        min_cost[state] for state in min_cost if state[0] == end
+    )
+
+    end_states = [
+        state for state in min_cost
+        if state[0] == end and min_cost[state] == minimal_total_cost
+    ]
+
+    positions_in_optimal_paths = set()
+    visited_states = set()
+    stack = end_states.copy()
+    while stack:
+        current_state = stack.pop()
+        if current_state in visited_states:
+            continue
+        visited_states.add(current_state)
+        pos, _ = current_state
+        positions_in_optimal_paths.add(pos)
+        if current_state in predecessors:
+            for prev_state in predecessors[current_state]:
+                stack.append(prev_state)
+
+    return positions_in_optimal_paths
+
+def ex2():
+    grid = read_file("day16/input.txt")
+    start, end = find_start_and_end(grid)
+    positions_in_optimal_paths = solve_maze_optimized(grid, start, end)
+    return len(positions_in_optimal_paths)
 
 if __name__ == "__main__":
-    print(ex1())
+    print(ex1(), end="\n")
+    print(ex2())
