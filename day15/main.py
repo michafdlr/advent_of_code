@@ -93,9 +93,9 @@ def rebuild_map(robot_map):
             new_map[row] += replace_map[robot_map[row][col]]
     return new_map
 
-def debug_print(robot_map):
-    for line in robot_map:
-        print("".join(line))
+# def debug_print(robot_map):
+#     for line in robot_map:
+#         print("".join(line))
 
 def try_move(robot_map, pos, dpos):
     row, col = pos
