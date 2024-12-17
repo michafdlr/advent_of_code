@@ -1,5 +1,4 @@
 from queue import PriorityQueue
-from collections import deque
 
 def read_file(filename):
     with open(filename, "r") as f:
