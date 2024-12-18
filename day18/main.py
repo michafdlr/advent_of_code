@@ -1,5 +1,4 @@
 from queue import PriorityQueue
-from heapq import heappush, heappop
 
 def read_file(filename):
     bytes = []
@@ -8,7 +7,6 @@ def read_file(filename):
     bytes = [list(map(int, l.rstrip("\n").split(","))) for l in file]
     return bytes
 
-rows, cols = 71, 71
 directions = [(-1, 0), (1, 0), (0, 1), (0, -1)]
 
 def get_corrupted_space(bytes, grid, number_of_bytes):
@@ -22,6 +20,7 @@ def debug_print(grid):
 
 def get_neighbors(pos, grid):
     r, c = pos
+    rows, cols = len(grid), len(grid[0])
     neighbors = []
     for dr, dc in directions:
         new_r, new_c = r+dr, c+dc
@@ -29,39 +28,42 @@ def get_neighbors(pos, grid):
             neighbors.append((new_r, new_c))
     return neighbors
 
-def manhattan(a, b):
-        return abs(a[0] - b[0]) + abs(a[1] - b[1])
+def find_shortest_path_pq(grid, start, end):
+    queue = PriorityQueue()
+    queue.put((0, start))
+    scores = {start: 0}
+    while not queue.empty():
+        prio, cur_pos = queue.get()
+        for neighbor in get_neighbors(cur_pos, grid):
+            if neighbor == end:
+                return prio + 1
+            if neighbor not in scores or scores[neighbor] > scores[cur_pos] + 1:
+                scores[neighbor] = scores[cur_pos] + 1
+                queue.put((scores[neighbor], neighbor))
+    return -1
 
-def find_shortest_path(grid, start, end):
-
-    open_set = []
-    heappush(open_set, (0 + manhattan(start, end), 0, start))
-    g_score = {start: 0}
-
-    while open_set:
-        _, current_cost, current = heappop(open_set)
-
-        if current == end:
-            return current_cost
-
-        for neighbor in get_neighbors(current, grid):
-            tentative_g_score = g_score[current] + 1
-
-            if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
-                g_score[neighbor] = tentative_g_score
-                priority = tentative_g_score + manhattan(neighbor, end)
-                heappush(open_set, (priority, tentative_g_score, neighbor))
-
-    return -1  # Path not found
-
-def ex1():
+def ex1(rows, cols, bytes):
     grid = [["." for _ in range(cols)] for _ in range(rows)]
     bytes_data = read_file("day18/input.txt")
-    grid = get_corrupted_space(bytes_data, grid, 1024)
-    start = (0, 0)  # Replace with actual start position
-    end = (rows - 1, cols - 1)  # Replace with actual end position
-    shortest_length = find_shortest_path(grid, start, end)
+    grid = get_corrupted_space(bytes_data, grid, bytes)
+    start = (0, 0)
+    end = (rows - 1, cols - 1)
+    shortest_length = find_shortest_path_pq(grid, start, end)
     return shortest_length
 
+
+def ex2(rows, cols, bytes_start):
+    grid = [["." for _ in range(cols)] for _ in range(rows)]
+    bytes_data = read_file("day18/input.txt")
+    start = (0, 0)
+    end = (rows - 1, cols - 1)
+    i = bytes_start
+    while find_shortest_path_pq(grid, start, end) != -1:
+        i += 1
+        grid = get_corrupted_space(bytes_data, grid, i)
+    return bytes_data[i-1]
+
+
 if __name__ == "__main__":
-    print(ex1())
+    print(ex1(71, 71, 1024))
+    print(ex2(71, 71, 1025))
