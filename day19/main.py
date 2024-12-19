@@ -7,61 +7,43 @@ def read_file(filename):
     designs = file[1].splitlines()
     return stripes, designs
 
-def can_create_target(strings, target):
-    memo = {}
-
-    def can_construct(substring):
-        if substring == "":
-            return True
-        if substring in memo:
-            return memo[substring]
-        for string in strings:
-            if substring.startswith(string):
-                suffix = substring[len(string):]
-                if can_construct(suffix):
-                    memo[substring] = True
-                    return True
-        memo[substring] = False
-        return False
-
-    return can_construct(target)
-
+def check_substring(substring, stripes, memo):
+    if substring == "":
+        return True
+    if substring in memo:
+        return memo[substring]
+    for stripe in stripes:
+        if substring.startswith(stripe):
+            suffix = substring[len(stripe):]
+            if check_substring(suffix, stripes, memo):
+                memo[substring] = True
+                return True
+    memo[substring] = False
+    return False
 
 def ex1():
     stripes, designs = read_file("day19/input.txt")
-    possible = 0
-    for design in designs:
-        if can_create_target(stripes, design):
-            possible += 1
-    return possible
+    return sum(check_substring(design, stripes, {}) for design in designs)
 
 
 #################### PART 2 ############################
 
-def count_ways(strings, target):
-    memo = {}
-
-    def count(substring):
-        if substring == "":
-            return 1
-        if substring in memo:
-            return memo[substring]
-        total_count = 0
-        for word in strings:
-            if substring.startswith(word):
-                suffix = substring[len(word):]
-                total_count += count(suffix)
-        memo[substring] = total_count
-        return total_count
-
-    return count(target)
+def count_possible_ways(substring, stripes, memo):
+    if substring == "":
+        return 1
+    if substring in memo:
+        return memo[substring]
+    count = 0
+    for stripe in stripes:
+        if substring.startswith(stripe):
+            suffix = substring[len(stripe):]
+            count += count_possible_ways(suffix, stripes, memo)
+    memo[substring] = count
+    return count
 
 def ex2():
     stripes, designs = read_file("day19/input.txt")
-    total = 0
-    for design in designs:
-        total += count_ways(stripes, design)
-    return total
+    return sum(count_possible_ways(design, stripes, {}) for design in designs)
 
 if __name__ == "__main__":
     print(ex1())
