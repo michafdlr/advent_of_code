@@ -1,9 +1,19 @@
-
+import time
 
 def read_file(filename):
     with open(filename, "r") as f:
         numbers = list(map(int,f.read().splitlines()))
     return numbers
+
+
+def timer(func):
+    def wrapper():
+        start = time.time()
+        result = func()
+        end = time.time()
+        print(f"Time needed for function {func.__name__}: {end-start:.2f} sec\n")
+        return result
+    return wrapper
 
 # Note:
 # 64 = 2**6
@@ -29,39 +39,19 @@ def step2(num):
 def step3(num):
     return prune(mix(num, num * 2048))
 
-"""
-def prune(value):
-    return value & 0x00FFFFFF
-
-def step1(num):
-    new = num << 6
-    return prune(num ^ new)
-
-def step2(num):
-    return prune(num ^ (num >> 5))
-
-def step3(num):
-    new = num << 11
-    return prune(num ^ new)
-"""
-
 def build_secret_number(num):
     return step3(step2(step1(num)))
 
 
-
+@timer
 def ex1():
     numbers = read_file("day22/input.txt")
-    final_cache = {}
-    new_numbers = []
+    total = 0
     for num in numbers:
-        if num not in final_cache:
-            temp = num
-            for _ in range(2000):
-                temp = build_secret_number(temp)
-            final_cache[num] = temp
-        new_numbers.append(final_cache[num])
-    return sum(new_numbers)
+        for _ in range(2000):
+            num = build_secret_number(num)
+        total += num
+    return total
 
 
 ################### PART 2 ###################################
@@ -69,7 +59,7 @@ def ex1():
 def get_last_digit(num):
     return int(str(num)[-1])
 
-
+@timer
 def ex2():
     numbers = read_file("day22/input.txt")
     sequence_cache = {}
@@ -98,5 +88,5 @@ def ex2():
     return max(sequence_cache.values())
 
 if __name__ == "__main__":
-    print(ex1())
-    print(ex2())
+    print(f"Solution 1: {ex1()}\n", end=f"{20*'-'}\n")
+    print(f"Solution 2: {ex2()}")
