@@ -1,5 +1,6 @@
 import time
 import networkx as nx
+from itertools import combinations
 
 
 def read_file(filename):
@@ -24,8 +25,8 @@ def timer(func):
         return result
     return wrapper
 
-def check_for_t(path):
-    for el in path:
+def check_for_t(comb):
+    for el in comb:
         if el.startswith("t"):
             return True
     return False
@@ -34,7 +35,14 @@ def check_for_t(path):
 def ex1():
     connections = read_file("day23/input.txt")
     graph = nx.from_dict_of_lists(connections)
-    return sum(check_for_t(path) for path in nx.simple_cycles(graph, length_bound = 3))
+    cliques = nx.find_cliques(graph)
+    clique_set = set()
+    for clique in cliques:
+        if len(clique) >= 3:
+            for comb in combinations(clique, r=3):
+                if check_for_t(comb):
+                    clique_set.add(tuple(sorted(comb)))
+    return len(clique_set)
 
 @timer
 def ex2():
