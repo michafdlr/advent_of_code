@@ -10,11 +10,11 @@ def read_file(filename):
     for wire in wires:
         wire = wire.split(": ")
         wire_values[wire[0]] = int(wire[1])
-    connection_list = []
+    gates = []
     for conn in connections:
         conn = conn.split(" ")
-        connection_list.append((conn[0], conn[1], conn[2], conn[-1]))
-    return wire_values, connection_list
+        gates.append((conn[0], conn[1], conn[2], conn[-1]))
+    return wire_values, gates
 
 
 def timer(func):
@@ -29,9 +29,9 @@ def timer(func):
 
 @timer
 def ex1():
-    wire_values, connection_list = read_file("day24/input.txt")
-    while connection_list:
-        for (wire1, gate, wire2, output) in connection_list:
+    wire_values, gates = read_file("day24/input.txt")
+    while gates:
+        for (wire1, gate, wire2, output) in gates:
             if wire1 not in wire_values or wire2 not in wire_values:
                 continue
             else:
@@ -41,7 +41,7 @@ def ex1():
                     wire_values[output] = wire_values[wire1] | wire_values[wire2]
                 if gate == "XOR":
                     wire_values[output] = wire_values[wire1] ^ wire_values[wire2]
-                connection_list.remove((wire1, gate, wire2, output))
+                gates.remove((wire1, gate, wire2, output))
     binary = ""
     for wire, value in sorted(wire_values.items()):
         if wire.startswith("z"):
