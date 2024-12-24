@@ -181,6 +181,6 @@ def ex2():
     return ",".join(sorted(swap1 + swap2 + swap3 + swap4))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(f"Solution 1: {ex1()}\n", end=f"{20*'-'}\n")
     print(f"Solution 2: {ex2()}")
