@@ -8,10 +8,10 @@ def read_file(filename):
         parts[i] = list(part.splitlines())
     locks, keys = [], []
     for part in parts:
-        if all(part[0][i] == "#" for i in range(len(part[0]))):
+        if part[0][0] == "#":
             locks.append(part)
         else:
-            keys.append(part)
+            keys.append(tuple(part))
     return locks, keys
 
 
@@ -36,14 +36,19 @@ def find_heights(element):
 def ex1():
     locks, keys = read_file("day25/input.txt")
     total = 0
+    key_heights = {}
     for lock in locks:
         l_heights = find_heights(lock)
         for key in keys:
-            k_heights = find_heights(key)
+            if key in key_heights:
+                k_heights = key_heights[key]
+            else:
+                k_heights = find_heights(key)
             if all(l_heights[i] + k_heights[i] <= 7  for i in range(len(l_heights))):
                 total += 1
+            else:
+                key_heights[key] = k_heights
     return total
-
 
 
 if __name__ == "__main__":
